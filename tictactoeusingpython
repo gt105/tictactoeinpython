@@ -1,3 +1,128 @@
+
+import random
+
+def print_board(board):
+    print("\nBoard:")
+    for i, row in enumerate(board):
+        print(f"{i} | {' | '.join(row)}")
+        if i < 2:
+            print("  " + "-"*9)
+    print("    0   1   2\n")
+
+def check_winner(board, player):
+    for i in range(3):
+        if all(board[i][j] == player for j in range(3)) or all(board[j][i] == player for j in range(3)):
+            return True
+    if all(board[i][i] == player for i in range(3)) or all(board[i][2-i] == player for i in range(3)):
+        return True
+    return False
+
+def player_move(board, player):
+    while True:
+        try:
+            row = int(input(f"Player {player}, enter row (0-2): "))
+            col = int(input(f"Player {player}, enter column (0-2): "))
+        except ValueError:
+            print("Enter valid numbers 0, 1, or 2.")
+            continue
+        if row not in range(3) or col not in range(3):
+            print("Invalid position. Try again.")
+            continue
+        if board[row][col] != " ":
+            print("Cell already taken. Choose another.")
+            continue
+        board[row][col] = player
+        break
+
+def ai_move(board, player, opponent):
+    best_score = -float('inf')
+    best_move = None
+    for r in range(3):
+        for c in range(3):
+            if board[r][c] == " ":
+                board[r][c] = player
+                score = minimax(board, False, player, opponent)
+                board[r][c] = " "
+                if score > best_score:
+                    best_score = score
+                    best_move = (r, c)
+    if best_move:
+        board[best_move[0]][best_move[1]] = player
+        print(f"AI ({player}) played at {best_move[0]}, {best_move[1]}")
+
+def minimax(board, is_maximizing, player, opponent):
+    if check_winner(board, player):
+        return 1
+    elif check_winner(board, opponent):
+        return -1
+    elif all(board[r][c] != " " for r in range(3) for c in range(3)):
+        return 0
+
+    if is_maximizing:
+        best_score = -float('inf')
+        for r in range(3):
+            for c in range(3):
+                if board[r][c] == " ":
+                    board[r][c] = player
+                    score = minimax(board, False, player, opponent)
+                    board[r][c] = " "
+                    best_score = max(best_score, score)
+        return best_score
+    else:
+        best_score = float('inf')
+        for r in range(3):
+            for c in range(3):
+                if board[r][c] == " ":
+                    board[r][c] = opponent
+                    score = minimax(board, True, player, opponent)
+                    board[r][c] = " "
+                    best_score = min(best_score, score)
+        return best_score
+
+def tic_tac_toe():
+    print("Welcome to Tic Tac Toe!")
+    score = {"X":0, "O":0, "Tie":0}
+    mode = input("Select mode: 1 - Human vs Human, 2 - Human vs AI: ")
+
+    while True:
+        board = [[" "]*3 for _ in range(3)]
+        players = ["X", "O"]
+        turn = 0
+        moves = 0
+
+        while moves < 9:
+            print_board(board)
+            player = players[turn % 2]
+
+            if mode == "2" and player == "O":
+                ai_move(board, "O", "X")
+            else:
+                player_move(board, player)
+
+            moves += 1
+
+            if check_winner(board, player):
+                print_board(board)
+                print(f"🎉 Player {player} wins!")
+                score[player] += 1
+                break
+
+            turn += 1
+        else:
+            print_board(board)
+            print("It's a tie!")
+            score["Tie"] += 1
+
+        print(f"\nScore → X: {score['X']} | O: {score['O']} | Ties: {score['Tie']}")
+
+        again = input("Play again? (y/n): ").lower()
+        if again != "y":
+            print("Thanks for playing!")
+            break
+
+if __name__ == "__main__":
+    tic_tac_toe()
+=======
 import tkinter as tk
 from tkinter import messagebox
 from playsound import playsound
@@ -171,3 +296,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     game = TicTacToe(root)
     root.mainloop()
+
+
+
